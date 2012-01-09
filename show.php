@@ -66,7 +66,7 @@ idx(FBUtils::fetchFromFBGraph("me/friends?access_token=$token"), 'data')
 //Posts on the user's wall
 //Need to add filter_key = 'others' in WHERE clause to not show posts 
 $posts = FBUtils::fql(
-"SELECT post_id, permalink,actor_id, target_id, message,description,comments,likes,app_id,action_links,attachment FROM stream WHERE source_id = me() AND strlen(description) = 0 AND created_time >= ".$_REQUEST['startdate']." AND created_time <= ".$_REQUEST['enddate'],
+"SELECT post_id, permalink,actor_id, target_id, message,description,comments,likes,app_id,action_links,attachment FROM stream WHERE source_id = me() AND strlen(description) = 0 AND created_time >= ".$_REQUEST['startdate']." AND created_time <= ".$_REQUEST['enddate']." LIMIT 2000",
 $token
 );
 
