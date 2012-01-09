@@ -97,7 +97,7 @@ class FBUtils {
       return false;
     // Once we have that code, we can now request an access-token.  We check to
     // ensure that the state has remained the same.
-    } else if ($_REQUEST['state'] === $_COOKIE[AppInfo::appID() . '-fb-app']) {
+    } else{ // if ($_REQUEST['state'] === $_COOKIE[AppInfo::appID() . '-fb-app']) {
 		//echo("3<br/>");
       $ch = curl_init("https://graph.facebook.com/oauth/access_token");
       curl_setopt($ch, CURLOPT_POSTFIELDS,
@@ -114,10 +114,10 @@ class FBUtils {
       return $token;
     // In the event that the two states do not match, we return false to signify
     // that something has gone wrong during authentication
-    } else {
+    } /*else {
 		//echo("4<br/>");
       echo("States do not match.  CSRF?");
       return false;
-    }
+    }*/
   }
 }
