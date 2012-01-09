@@ -37,3 +37,9 @@ class AppInfo {
   }
 
 }
+require 'fbsdk/src/facebook.php';
+
+$facebook = new Facebook(array(
+      'appId'  => AppInfo::appID(),
+      'secret' => AppInfo::appSecret(),
+));

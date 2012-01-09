@@ -138,7 +138,7 @@ document.createElement(tags.pop());
 </head>
 <body>
 <header class="clearfix">
-<p id="picture" style="background-image: url(https://graph.facebook.com/me/picture?type=normal&access_token=<?php echoEntity($token) ?>)"></p>
+<p id="picture" style="background-image: url(https://graph.facebook.com/me/picture?type=square&access_token=<?php echoEntity($token) ?>)"></p>
 <div>
 	<h1>Welcome, <strong><?php echo idx($basic, 'name'); ?></strong></h1>
 	<p class="tagline">Add the required posts to Selected tab and click on selected tab<br/>

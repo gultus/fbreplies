@@ -37,45 +37,40 @@ if ($token) {
 
   // Fetch the viewer's basic information, using the token just provided
   $basic = FBUtils::fetchFromFBGraph("me?access_token=$token");
-  $my_id = assertNumeric(idx($basic, 'id'));
-
-  // Fetch the basic info of the app that they are using
-  $app_id = AppInfo::appID();
-  $app_info = FBUtils::fetchFromFBGraph("$app_id?access_token=$token");
-
-  // This fetches some things that you like . 'limit=*" only returns * values.
-  // To see the format of the data you are retrieving, use the "Graph API
-  // Explorer" which is at https://developers.facebook.com/tools/explorer/
-  $likes = array_values(
-    idx(FBUtils::fetchFromFBGraph("me/likes?access_token=$token&limit=4"), 'data')
-  );
-
-  // This fetches 4 of your friends.
-  $friends = array_values(
-    idx(FBUtils::fetchFromFBGraph("me/friends?access_token=$token&limit=4"), 'data')
-  );
-
-  // And this returns 16 of your photos.
-  $photos = array_values(
-    idx($raw = FBUtils::fetchFromFBGraph("me/photos?access_token=$token&limit=16"), 'data')
-  );
-
-  // Here is an example of a FQL call that fetches all of your friends that are
-  // using this app
-  $app_using_friends = FBUtils::fql(
-    "SELECT uid, name, is_app_user, pic_square FROM user WHERE uid in (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user = 1",
-    $token
-  );
-
-  // This formats our home URL so that we can pass it as a web request
-  $encoded_home = urlencode(AppInfo::getHome());
-  $redirect_url = $encoded_home . 'close.php';
-
-  // These two URL's are links to dialogs that you will be able to use to share
-  // your app with others.  Look under the documentation for dialogs at
-  // developers.facebook.com for more information
-  $send_url = "https://www.facebook.com/dialog/send?redirect_uri=$redirect_url&display=popup&app_id=$app_id&link=$encoded_home";
-  $post_to_wall_url = "https://www.facebook.com/dialog/feed?redirect_uri=$redirect_url&display=popup&app_id=$app_id";
+  $facebook->setAccessToken($token);
+  $batch = new facebook_batch();
+  $posts = json_decode( $_REQUEST['post-list']);
+  if(isset($_REQUEST['action-comment'])&&$_REQUEST['action-comment']=="on"){
+	  foreach( $posts as $postId => $msg ){
+		$added=$batch->add("/$postId/comments",'POST',
+			     array(
+				'message'=> (($msg!="")?$msg:$_REQUEST['default-msg'])
+			   ));
+		if(!$added){
+			$batch->execute();
+			$batch->removeAll();
+			$batch->add("/$postId/comments",'POST',
+			     array(
+				'message'=> (($msg!="")?$msg:$_REQUEST['default-msg'])
+			   ));
+		}
+	}
+	$batch->execute();
+	$batch->removeAll();
+  }
+  if(isset($_REQUEST['action-like'])&&$_REQUEST['action-like']=="on"){
+	  foreach( $posts as $postId => $msg ){
+		$added=$batch->add("/$postId/likes",'POST');
+		if(!$added){
+			$batch->execute();
+			$batch->removeAll();
+			$batch->add("/$postId/likes",'POST');
+		}
+	}
+	$batch->execute();
+	$batch->removeAll();
+  }
+  
 } else {
   // Stop running if we did not get a valid response from logging in
   exit("Invalid credentials");
@@ -154,7 +149,7 @@ if ($token) {
       <!-- By passing a valid access token here, we are able to display -->
       <!-- the user's images without having to download or prepare -->
       <!-- them ahead of time -->
-      <p id="picture" style="background-image: url(https://graph.facebook.com/me/picture?type=normal&access_token=<?php echoEntity($token) ?>)"></p>
+      <p id="picture" style="background-image: url(https://graph.facebook.com/me/picture?type=square&access_token=<?php echoEntity($token) ?>)"></p>
 
       <div>
         <h1>Thank You, <strong><?php echo idx($basic, 'name'); ?></strong></h1>
@@ -164,9 +159,7 @@ if ($token) {
       </div>
       <div style="display:block;margin-top:50px;">
 
-<?php
-print_r($_REQUEST);
-?>
+	Your Likes and Replies have been posted! yaay! :)
 
       </div>
     </header>
